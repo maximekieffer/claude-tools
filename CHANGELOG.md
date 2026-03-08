@@ -12,6 +12,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.1] - 2026-03-08
+
+### Changed
+- `usage-statusline` now refreshes on every Claude Code response (10-second debounce cache instead of 5 minutes)
+
+### Added
+- `usage-statusline` displays dimmed "↺Xh00m" / "↺Xd0h" reset countdown next to each usage figure
+
+---
+
 ## [0.1.0] - 2026-03-08
 
 ### Added

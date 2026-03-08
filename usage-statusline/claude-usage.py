@@ -2,7 +2,7 @@
 """
 Claude Code usage statusline
 Fetches 5-hour and 7-day usage limits from the Anthropic OAuth API.
-Caches results for 5 minutes.
+Refreshes on every call, with a 10-second debounce cache.
 """
 
 import io
@@ -12,11 +12,12 @@ import sys
 import time
 import urllib.request
 import urllib.error
+from datetime import datetime, timezone
 
 # Force UTF-8 output on Windows, use Unix line endings
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", newline="\n")
 
-CACHE_MAX_AGE = 300  # 5 minutes
+CACHE_MAX_AGE = 10  # seconds — debounce only, effectively per-call
 
 def get_cache_path():
     # Use temp dir that works cross-platform
@@ -73,15 +74,44 @@ def color(pct):
     return "\033[32m"      # green
 
 RESET = "\033[0m"
+DIM = "\033[2m"
+
+def time_until(iso_str):
+    """Return a compact human-readable string for time remaining until iso_str."""
+    if not iso_str:
+        return ""
+    try:
+        reset_at = datetime.fromisoformat(iso_str)
+        now = datetime.now(timezone.utc)
+        delta = reset_at - now
+        secs = int(delta.total_seconds())
+        if secs <= 0:
+            return "now"
+        days, rem = divmod(secs, 86400)
+        hours, rem = divmod(rem, 3600)
+        minutes = rem // 60
+        if days > 0:
+            return f"{days}d{hours}h"
+        if hours > 0:
+            return f"{hours}h{minutes:02d}m"
+        return f"{minutes}m"
+    except Exception:
+        return ""
 
 def format_output(data):
     h = data.get("five_hour") or {}
     w = data.get("seven_day") or {}
     h_pct = h.get("utilization") or 0
     w_pct = w.get("utilization") or 0
+    h_reset = time_until(h.get("resets_at"))
+    w_reset = time_until(w.get("resets_at"))
+
+    h_reset_str = f" {DIM}↺{h_reset}{RESET}" if h_reset else ""
+    w_reset_str = f" {DIM}↺{w_reset}{RESET}" if w_reset else ""
+
     return (
-        f"\u26a1 5h {color(h_pct)}{h_pct:.0f}%{RESET}"
-        f" | 7d {color(w_pct)}{w_pct:.0f}%{RESET}"
+        f"\u26a1 5h {color(h_pct)}{h_pct:.0f}%{RESET}{h_reset_str}"
+        f"  7d {color(w_pct)}{w_pct:.0f}%{RESET}{w_reset_str}"
     )
 
 def main():
