@@ -105,8 +105,8 @@ def format_output(data):
     h_reset = time_until(h.get("resets_at"))
     w_reset = time_until(w.get("resets_at"))
 
-    h_reset_str = f" ↺{h_reset}" if h_reset else ""
-    w_reset_str = f" ↺{w_reset}" if w_reset else ""
+    h_reset_str = f" ↺ {h_reset}" if h_reset else ""
+    w_reset_str = f" ↺ {w_reset}" if w_reset else ""
 
     return (
         f"\u26a1 5h {color(h_pct)}{h_pct:.0f}%{RESET}{h_reset_str}"
