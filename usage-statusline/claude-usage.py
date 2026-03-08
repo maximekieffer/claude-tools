@@ -74,7 +74,6 @@ def color(pct):
     return "\033[32m"      # green
 
 RESET = "\033[0m"
-DIM = "\033[2m"
 
 def time_until(iso_str):
     """Return a compact human-readable string for time remaining until iso_str."""
@@ -106,8 +105,8 @@ def format_output(data):
     h_reset = time_until(h.get("resets_at"))
     w_reset = time_until(w.get("resets_at"))
 
-    h_reset_str = f" {DIM}↺{h_reset}{RESET}" if h_reset else ""
-    w_reset_str = f" {DIM}↺{w_reset}{RESET}" if w_reset else ""
+    h_reset_str = f" ↺{h_reset}" if h_reset else ""
+    w_reset_str = f" ↺{w_reset}" if w_reset else ""
 
     return (
         f"\u26a1 5h {color(h_pct)}{h_pct:.0f}%{RESET}{h_reset_str}"
